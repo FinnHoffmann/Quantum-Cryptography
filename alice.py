@@ -1,5 +1,6 @@
 import random
-from qiskit import QuantumCircuit, Aer, transpile, assemble
+from qiskit import QuantumCircuit
+from qiskit_aer import Aer
 
 def prepare_qubits(n):
     """
@@ -11,7 +12,7 @@ def prepare_qubits(n):
 
     qubits = []
     for bit, basis in zip(alice_bits, alice_bases):
-        qc = QuantumCircuit(1, 1)
+        qc = QuantumCircuit(1)
         if bit == 1:
             qc.x(0)  # Apply X-gate for bit value 1
         if basis == 'X':

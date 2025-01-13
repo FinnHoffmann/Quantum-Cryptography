@@ -1,5 +1,5 @@
 import random
-from qiskit import QuantumCircuit, transpile
+from qiskit import transpile
 from qiskit_aer import Aer
 
 def measure_qubits(qubits):
@@ -25,5 +25,3 @@ def measure_qubits(qubits):
         bob_bits.append(measured_bit)
 
     return bob_bases, bob_bits
-
-
