@@ -14,3 +14,8 @@ def compare_keys(alice_bits, alice_bases, bob_bases, bob_bits):
         print("Warning: Keys do not fully match! Possible eavesdropping detected.")
 
     return shared_key_alice, shared_key_bob
+
+def error_rate(alice_key, bob_key):
+    errors = sum(a != b for a, b in zip(alice_key, bob_key))
+    error_rate = errors / len(alice_key)
+    return error_rate
