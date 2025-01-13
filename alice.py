@@ -19,3 +19,11 @@ def prepare_qubits(n):
         qubits.append(qc)
 
     return alice_bits, alice_bases, qubits
+
+def send_qubits(qubits):
+    """
+    Prepares qubits for simulation by transpiling them.
+    """
+    simulator = Aer.get_backend('statevector_simulator')
+    transpiled_circuits = [transpile(qc, simulator) for qc in qubits]
+    return transpiled_circuits
