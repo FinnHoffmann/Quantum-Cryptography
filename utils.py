@@ -1,21 +1,15 @@
-def compare_keys(alice_bits, alice_bases, bob_bases, bob_bits):
-    """
-    Matches the bases between Alice and Bob and derives the shared key.
-    """
-    shared_key_alice = []
-    shared_key_bob = []
+def matching_indices(ar1, ar2):
+    return [i for i, (a, b) in enumerate(zip(ar1, ar2)) if a == b]
 
-    for a_bit, a_basis, b_basis, b_bit in zip(alice_bits, alice_bases, bob_bases, bob_bits):
-        if a_basis == b_basis:
-            shared_key_alice.append(a_bit)
-            shared_key_bob.append(b_bit)
+def mismatching_indices(ar1, ar2):
+    return [i for i, (a, b) in enumerate(zip(ar1, ar2)) if a != b]
 
-    if shared_key_alice != shared_key_bob:
-        print("Warning: Keys do not fully match! Possible eavesdropping detected.")
+def get_key(bits, matching_bases):
+    return [bits[i] for i in matching_bases]
 
-    return shared_key_alice, shared_key_bob
-
-def error_rate(alice_key, bob_key):
+def calculate_error_rate(alice_key, bob_key):
     errors = sum(a != b for a, b in zip(alice_key, bob_key))
-    error_rate = errors / len(alice_key)
+    error_rate = errors / len(alice_key) if alice_key else 0
     return error_rate
+
+
