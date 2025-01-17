@@ -20,3 +20,15 @@ def measure_qubits(qubits):
     bob_bits = [int(bit) for bit in bob_bits_string][::-1]
 
     return bob_bases, bob_bits
+
+def public_key(bob_key, percentage = 20):
+    # percantage of the key to be published
+    count_float = len(bob_key) * (percentage / 100)
+    count = int(count_float) + (count_float > int(count_float))
+    selected_indices = []
+    selected_elements = []
+    for _ in range(count):
+        index = random.randint(0, len(bob_key) - 1)
+        selected_indices.append(index)
+        selected_elements.append(bob_key.pop(index))
+    return selected_elements, selected_indices

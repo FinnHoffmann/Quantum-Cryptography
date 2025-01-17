@@ -2,13 +2,16 @@ import alice
 import bob
 import eav
 import utils
+import simulate
 
 def main():
-    n = 10  # Number of qubits
+    n_qubits = 10  # Number of qubits
     eavesdropping_enabled = True  # Toggle eavesdropping on or off
 
     print("Steps 1-3: Preparing, Eavesdropping (if enabled), and Measuring")
-    qubits, alice_bits, alice_bases = alice.prepare_qubits(n)
+    qubits, alice_bits, alice_bases = alice.prepare_qubits(n_qubits)
+    eav_bases = eav.eavsdropping(qubits)
+    bob_bases, bob_bits = bob.measure_qubits(qubits)
 
     if eavesdropping_enabled:
         eav_bases = eav.eavsdropping(qubits)
@@ -34,8 +37,8 @@ def main():
     matching_bases_alice_bob = utils.matching_indices(alice_bases, bob_bases)
     mismatching_bases_eav = utils.mismatching_indices(alice_bases, eav_bases)
 
-    shared_key_alice = utils.get_key(alice_bits, matching_bases_alice_bob)
-    shared_key_bob = utils.get_key(bob_bits, matching_bases_alice_bob)
+    private_key_alice = utils.get_key(alice_bits, matching_bases_alice_bob)
+    private_key_bob = utils.get_key(bob_bits, matching_bases_alice_bob)
 
     print(f"Indices with matching bases (Alice & Bob): {matching_bases_alice_bob}")
     print(f"Indices where Eve's guess is incorrect (potential Bit-Switch): {mismatching_bases_eav}")
@@ -44,21 +47,49 @@ def main():
     matching_bases_count = len(matching_bases_alice_bob)
     mismatching_bases_count = len(mismatching_bases_eav)
 
+    # times where Bob guessed right and Eav wrong
     potential_bit_switch_key = len(list(set(matching_bases_alice_bob) & set(mismatching_bases_eav)))
+
+    # (Bob right and Eav wrong) / (Bob right)
     potential_bit_switch_rate = potential_bit_switch_key / len(matching_bases_alice_bob)
-    bit_switchs_total = len(utils.mismatching_indices(alice_bits, bob_bits))
-    bit_switchs_keys = len(utils.mismatching_indices(shared_key_alice, shared_key_bob))
-    actual_bit_switch_rate = (bit_switchs_keys / potential_bit_switch_key) if potential_bit_switch_key else 0
+
+    # 
+    bit_switches_total = len(utils.mismatching_indices(alice_bits, bob_bits))
+    bit_switches_keys = len(utils.mismatching_indices(private_key_alice, private_key_bob))
+    actual_bit_switch_rate = (bit_switches_keys / potential_bit_switch_key) if potential_bit_switch_key else 0
 
 
     print(f"Proportion of potential Bit-Switch (Eve wrong and Bob correct / Bob correct): {potential_bit_switch_rate:.2f}")
     print(f"Proportion of actual Bit-Switch in Bobs Key (actual / potential): {actual_bit_switch_rate:.2f}")
 
     print("\nStep 6: Error rate analysis")
-    error_rate = utils.calculate_error_rate(shared_key_alice, shared_key_bob)
-    print(f"Alice's shared key: {shared_key_alice}")
-    print(f"Bob's shared key:   {shared_key_bob}")
-    print(f"Overall error rate in shared keys (Alice & Bob): {error_rate:.2f}")
+    error_rate = utils.calculate_error_rate(private_key_alice, private_key_bob)
+    print(f"Alice's private key: {private_key_alice}")
+    print(f"Bob's private key:   {private_key_bob}")
+    print(f"Overall error rate in private keys (Alice & Bob): {error_rate:.2f}")
+
+    public_key_bob, key_indices = bob.public_key(private_key_bob)
+    public_key_alice = [private_key_alice[i] for i in key_indices]
+
+    print(f"Bob publishes this part of his key (and the corresponding indices): {public_key_bob}")
+    print(f"Alice publishes her public key: {public_key_alice}")
+    error_rate_public = utils.calculate_error_rate(public_key_alice, public_key_bob)
+    if error_rate_public > 0.2:
+        print("The error rate of the portion of the key that was published is above the threshold -> probably eavsdropping")
+    else:
+        final_key_alice = [private_key_alice[i] for i in range(len(private_key_alice)) if i not in key_indices]
+        final_key_bob = [private_key_bob[i] for i in range(len(private_key_bob)) if i not in key_indices]
+        print("The error rate in the published keys is not too high and Alice and Bob continue with the unpublished parts:")
+        print(f"Alice final Key: {final_key_alice}")
+        print(f"Bobs final key: {final_key_bob}")
+
+def main_sim():
+    potential_bit_switch_rate_mean, actual_bit_switch_rate_mean, error_rate_mean = simulate.average_sim(100, 10)
+
+    print(f"Potential Bit switch rate: {potential_bit_switch_rate_mean}")
+    print(f"actual Bit switch rate: {actual_bit_switch_rate_mean}")
+    print(f"Error Rate: {error_rate_mean}")
+
 
 if __name__ == "__main__":
     main()

@@ -12,11 +12,5 @@ def eavsdropping(qubits):
         if eav_bases[i] == "X":
             qubits.h(i)
     qubits.measure(range(n),range(n))
-    
-    # transpiled_qubits = transpile(qubits, simulator)
-    # job = simulator.run(transpiled_qubits, shots=1)
-
-    # bob_bits_string = list(((job.result()).get_counts()).keys())[0]
-    # bob_bits = [int(bit) for bit in bob_bits_string][::-1]
 
     return eav_bases
