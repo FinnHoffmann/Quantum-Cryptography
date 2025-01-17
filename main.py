@@ -5,7 +5,7 @@ import utils
 import simulate
 
 def main():
-    n_qubits = 10  # Number of qubits
+    n_qubits = 15  # Number of qubits
     eavesdropping_enabled = True  # Toggle eavesdropping on or off
 
     print("Steps 1-3: Preparing, Eavesdropping (if enabled), and Measuring")
@@ -16,7 +16,7 @@ def main():
     if eavesdropping_enabled:
         eav_bases = eav.eavsdropping(qubits)
     else:
-        eav_bases = ['-'] * n  # Placeholder for no eavesdropping
+        eav_bases = ['-'] * n_qubits  # Placeholder for no eavesdropping
 
     bob_bases, bob_bits = bob.measure_qubits(qubits)
 
@@ -77,11 +77,13 @@ def main():
     if error_rate_public > 0.2:
         print("The error rate of the portion of the key that was published is above the threshold -> probably eavsdropping")
     else:
-        final_key_alice = [private_key_alice[i] for i in range(len(private_key_alice)) if i not in key_indices]
-        final_key_bob = [private_key_bob[i] for i in range(len(private_key_bob)) if i not in key_indices]
+        unpublished_key_alice = [private_key_alice[i] for i in range(len(private_key_alice)) if i not in key_indices]
+        unpublished_key_bob = [private_key_bob[i] for i in range(len(private_key_bob)) if i not in key_indices]
         print("The error rate in the published keys is not too high and Alice and Bob continue with the unpublished parts:")
-        print(f"Alice final Key: {final_key_alice}")
-        print(f"Bobs final key: {final_key_bob}")
+        print(f"Alice unpublished key-part: {unpublished_key_alice}")
+        print(f"Bobs unpublished key-part: {unpublished_key_bob}")
+        unifyed_key = utils.unify_keys(unpublished_key_alice, unpublished_key_bob)
+        print(f"Alice and Bob use Hamming Codes to get the unified Key: {unifyed_key}")
 
 def main_sim():
     potential_bit_switch_rate_mean, actual_bit_switch_rate_mean, error_rate_mean = simulate.average_sim(100, 10)
